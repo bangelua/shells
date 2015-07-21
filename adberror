@@ -1,0 +1,3 @@
+#! /bin/bash
+export PATH
+adb logcat | grep -E '^E'
