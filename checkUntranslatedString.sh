@@ -7,37 +7,75 @@ export PATH
 
 function check_translation_in_other_file(){
 	#echo -e "\nstart search $1"	
-	JAPAN_ANDROID_STRING=res/values-ja/strings.xml
-	JAPAN_SMARTISAN_STRING=res/values-ja/smartisan_strings.xml
-	#echo $1
-	KEY=`echo $1 | cut -d '"' -f 2`
-	#echo $KEY
-	COUNT_ANDROID=`grep -v "!--" $JAPAN_ANDROID_STRING | grep -c $KEY`
-	COUNT_SMARTISAN=`grep -v "!--" $JAPAN_SMARTISAN_STRING | grep -c $KEY `
+	ANDROID_STRING="res/$2/strings.xml"
+	SMARTISAN_STRING="res/$2/smartisan_strings.xml"
+	#echo $ANDROID_STRING
 
-	if (( $COUNT_ANDROID==0 )) && (( $COUNT_SMARTISAN==0 )); then
-		echo -e "$1"		
+	if [ ! -f $ANDROID_STRING ]; then
+	echo "input file $ANDROID_STRING not exists, operation failed!!!"
+	
 	fi
 
-	KOREA_STRING=res/values-ko/smartisan_strings.xml
-	#COUNT=`grep -c $1 $KOREA_STRING`	
+	COUNT_ANDROID=`grep -v '!--' "$ANDROID_STRING"  | grep -c "$1" `
+	COUNT_SMARTISAN=`grep -v '!--' "$SMARTISAN_STRING" | grep -c "$1" `
+
+	if (( $COUNT_ANDROID==0 )) && (( $COUNT_SMARTISAN==0 )); then
+		#echo -e "not found $1"
+		return 0
+	fi
+	return 1
 }
 
 #main()
-INPUT_FILE=res/values/smartisan_strings.xml
+TARGET_STRING=( values-zh-rCN values )
 echo -e "finding untranslated strings...\n"
-while read line
+for target in ${TARGET_STRING[@]}
 	do
-		#echo $line
-		#echo -e "\n"
-		PREFIX="<string"
-		if [[ $line =~ ^$PREFIX ]]; then
-			#echo "start with $line"						
-			check_translation_in_other_file "$line"
-		else
-			#echo "not valid, continue"
-			continue
-		fi
-	done < $INPUT_FILE
+		TMPFILE=$target
+		INPUT_FILE=res/$target/smartisan_strings.xml
+		echo -e "\n~~~~~~~~~~~\nstart checking file $INPUT_FILE\n-----------------------------------------"
+		echo -e "Untranslated in\t\t\t\t\t\t\t\t\tKEY"
+		while read -r line || [ -n "$line" ]
+			do
+				#echo $line 
+				#echo -e "\n"
+				PREFIX="<string"
+				if [[ $line =~ ^$PREFIX ]]; then
+					#echo "start with $line"	
+					KEY=`echo $line | cut -d '"' -f 2`
+					KEY="\"${KEY}\""
+					#echo $KEY
+					RESULT=""
+					ARRAY_STRINGS=( values values-zh-rCN values-zh-rTW values-ja values-ko )	
+					for dir in ${ARRAY_STRINGS[@]}
+						do
+							if [ $dir == $target ]; then
+								#echo "same dir"
+								continue
+							fi
+							#echo "start check dir: $dir"
+							check_translation_in_other_file "$KEY" $dir
+							#echo $?
+							if [[ $? -eq 0 ]]; then
+								RESULT="${RESULT}${dir}&"
+								
+							fi
+						done
+
+					if [[ -n $RESULT ]]; then						
+						touch $TMPFILE
+						#echo "touch $TMPFILE"
+						echo -e "${RESULT%&}\t\t\t\t\t\t\t\t\t${KEY}" >> $TMPFILE
+					fi
+
+				else
+					#echo "not valid, continue"
+					continue
+				fi
+			done < $INPUT_FILE
+			
+			test -f $TMPFILE && sort -k 1 $TMPFILE && rm $TMPFILE
+	done
+
 echo -e "\ndone"
 exit 0

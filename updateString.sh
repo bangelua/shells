@@ -19,7 +19,7 @@ function addstring(){
 	KEY="\"$2\""
 	VALUE=$3
 	#echo "start add string key: ${KEY} , value: ${VALUE}"
-	COUNT=`grep -n $KEY $1 | grep -v "!--" | grep -c $KEY`
+	COUNT=`grep -n $KEY $1 | grep -c $KEY`
 	TARGET_STRING="\    <string name=${KEY}>$VALUE</string>"
 	#echo "find key count lines: ${COUNT}"
 	LINE_NUM=`grep -n $KEY $1 | grep -v "!--" | cut -d ':' -f 1`
