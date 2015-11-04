@@ -53,6 +53,9 @@ elif [[ $1 =~ ".rar" ]]; then
 elif [[ $1 =~ ".zip" ]]; then
 	#echo "file is zip"
 	unzip $1 -d $TEMP_DIR > /dev/null
+elif [[ $1 =~ ".tar.bz2" ]]; then
+    mkdir $TEMP_DIR
+    tar -jxf $1 -C $TEMP_DIR
 else
 	echo "invalid file $1, file should be 7z, zip or rar"
 	exit 1

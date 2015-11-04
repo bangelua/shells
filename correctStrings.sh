@@ -17,33 +17,41 @@
 export PATH
 
 function addstring(){
-	KEY="\"$2\""
-	VALUE=$3
-	#echo "start add string key: ${KEY} , value: ${VALUE}"
-	COUNT=`grep -n $KEY $1 | grep -c $KEY`
+	ANDROID_STRING_FILE="res/$1/strings.xml"
+	SMARTISAN_STRING_FILE="res/$1/smartisan_strings.xml"
+	#echo "android string file: $ANDROID_STRING_FILE"
+	#echo "smartisan string file: $SMARTISAN_STRING_FILE"
+	echo $2
+	STRING_NAME=`echo "$2" | cut -d "\"" -f 2`
+	#KEY="\"${STRING_NAME}\""
+	#echo "KEY: $KEY"
+
+	COUNT=`grep -n $KEY $SMARTISAN_STRING_FILE | grep -c $KEY`
 	TARGET_STRING="\    <string name=${KEY}>$VALUE</string>"
 	#echo "find key count lines: ${COUNT}"
-	LINE_NUM=`grep -n $KEY $1 | grep -v "!--" | cut -d ':' -f 1`
+	LINE_NUM=`grep -n $KEY $SMARTISAN_STRING_FILE | grep -v "!--" | cut -d ':' -f 1`
 
 	if [ -z "$LINE_NUM" ]; then
-		LINE_NUM=`grep -n '</resources>' $1 | cut -d ':' -f 1`
-		let LINE_NUM-=1
-		#echo "NOT FOUND KEY: ${KEY}, get file last line num: ${LINE_NUM}"
-		CMD="${LINE_NUM}a\\${TARGET_STRING}"
-		sed -i "${CMD}" $1
+		echo "NOT FOUND KEY: ${KEY}, failed to correct it!!!"
+		#LINE_NUM=`grep -n '</resources>' $1 | cut -d ':' -f 1`
+		#let LINE_NUM-=1
+		
+		#CMD="${LINE_NUM}a\\${TARGET_STRING}"
+		#sed -i "${CMD}" $1
 		return 0
 	elif (( $COUNT > 1 )); then
-		echo "find not only one KEY: ${KEY}, please exam the file ${1}!"
+		echo "find not only one KEY: ${KEY}, please exam the string file!"
 		return -1
 	fi
 	if [ -z $LINE_NUM ]; then
 		echo "failed to find a place to insert the key: ${KEY}"
 		return -2
 	fi
-	CMD="${LINE_NUM}c\\${TARGET_STRING}"
+	TARGET_STRING="    "$2
+	CMD="${LINE_NUM}c\\$TARGET_STRING"
 	#echo "find string at line $LINE_NUM"
 	#echo "exec cmd: ${CMD}"
-	sed -i "${CMD}" $1
+	sed -i "${CMD}" $SMARTISAN_STRING_FILE
 	return 0
 }
 
@@ -73,7 +81,11 @@ FAILED_COUNT=0
 while read -r line || [ -n "$line" ]
 do
 	#echo "$line"
-	STRING_FILE="res/${VALUE_DIR}/smartisan_strings.xml"
+	if [ -z "$line" ]; then
+		echo "empty char, just continue"
+		continue
+	fi
+	
 	KEY=`echo "$line" | cut -d ' ' -f 1`
 
 	case $KEY in
@@ -103,25 +115,20 @@ do
 	*)
 	;;
 	esac
-	#echo "$line"
-	VALUE=`echo "$line" | cut -d ' ' -f 2-`
-	#echo "value: ${VALUE}"
-	
-	if [ -z "$KEY" -o -z "$VALUE" ]; then
-		#echo "empty char, just continue"
-		continue
-	fi
 
+
+	echo "$line"
 	#echo "-------------add string"	
-	addstring $STRING_FILE $KEY "${VALUE}"
+	addstring $VALUE_DIR "$line"
 	if(( $? == 0)); then
 		let SUCCESS_COUNT++
 		
-		TARGET_STRING="    <string name=${KEY}>"${VALUE}"</string>"
-		echo "${TARGET_STRING}"
+		#TARGET_STRING="    <string name=${KEY}>"${VALUE}"</string>"
+		#echo "${TARGET_STRING}"
+		echo "update $line"
 	else
 		let FAILED_COUNT++
-		echo "failto insert $VALUE"
+		echo "failto insert $line"
 	fi
 done < $1
 
