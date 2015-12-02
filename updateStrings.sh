@@ -73,7 +73,11 @@ function updateString(){
 	STRING_NAME=`echo "$1" | cut -d "\"" -f 2`
 	STRING_NAME="\"${STRING_NAME}\""
 	#echo "string name: $STRING_NAME"
-	LINE_NUM=`grep -n $STRING_NAME $SMARTISAN_STRING_FILE | grep -v "!--" | cut -d ':' -f 1`
+	LINE_NUM=""
+	if [ -f $SMARTISAN_STRING_FILE ]; then
+		LINE_NUM=`grep -n $STRING_NAME $SMARTISAN_STRING_FILE | grep -v "!--" | cut -d ':' -f 1`
+	fi
+	echo "LINE_NUM: $LINE_NUM"
 	if [ -z "$LINE_NUM" ]; then
 		#echo "not found $STRING_NAME in file $SMARTISAN_STRING_FILE, try file $ANDROID_STRING_FILE..."
 		LINE_NUM=`grep -n $STRING_NAME $ANDROID_STRING_FILE | grep -v "!--" | cut -d ':' -f 1`

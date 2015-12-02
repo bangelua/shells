@@ -16,7 +16,7 @@ function traverse(){
         		#\grep --color=auto -A 20 $KEY_WORLD $filename
         		count=`grep -c "$KEY_WORLD" $filename`
         		if (( $count > 0 )); then
-        			echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> $file:"
+        			echo ">>>>>>>>>>>>>>>>>> Crash execption found at file $file:"
              		\grep --color=auto -A 40 "$KEY_WORLD" $filename
                     echo "---------------------------------------------"
              	#else
@@ -60,7 +60,7 @@ else
 	echo "invalid file $1, file should be 7z, zip or rar"
 	exit 1
 fi
-	echo "start search log info..."
+	echo "start search crash logs info..."
 	traverse $TEMP_DIR
 	#delete temp dir
 	\rm -fr $TEMP_DIR
