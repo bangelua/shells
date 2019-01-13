@@ -1,3 +1,4 @@
 #!/bin/sh
 export PATH
 adb logcat -s luliang
+#just test
