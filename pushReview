@@ -1,0 +1,36 @@
+#bin/bash
+#在工程目录下运行本脚本
+#分支：默认为当前分支，可以手动指定其他分支名称
+#在脚本同目录下新建文件reviewers.txt，每行填入reviewer的邮件，一行一个
+#如果文件在工程目录下，请加入gitignore
+#
+#
+# 输出信息示例：
+#$ sh review
+#======== branch: feature/2nd-7.0
+
+prefix="======== "
+
+git_prefix=".git"
+if [ ! -d "$git_prefix" ]; then
+    echo "! [Illegal git repository directory]"
+    echo "  移动脚本到git仓库根目录"
+    exit 1
+fi
+
+branch_name=$1
+if [ -z "$branch_name" ]; then
+    branch_name=`git branch | grep "*" | awk '{print $2}'`
+    echo $prefix"branch: "$branch_name
+fi
+
+reviewer_param="git receive-pack"
+
+#echo "$reviewer_param"
+
+git push --receive-pack="$reviewer_param" origin HEAD:refs/for/$branch_name
+if [ $? -eq 0 ]; then
+    exit 0
+else
+    exit 1
+fi
