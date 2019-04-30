@@ -1,3 +1,3 @@
 #!/bin/bash
 export PATH
-find . | grep --color=auto -i $1
+find . -not -path '*/\.*' | grep --color=auto -i $1

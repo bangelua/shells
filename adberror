@@ -1,3 +1,0 @@
-#! /bin/bash
-export PATH
-adb logcat -v time | egrep 'CrashReport|AndroidRuntime'
