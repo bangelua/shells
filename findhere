@@ -1,3 +1,3 @@
 #!/bin/bash
 export PATH
-find . -not -path '*/\.*' | grep --color=auto -i $1
+find . -not -path '*/\.*' -not -path '*/tmp/*' -not -path '*/intermediates/*' -not -path '*/build/kotlin/*' | grep --color=auto -i $1

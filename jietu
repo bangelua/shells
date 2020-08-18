@@ -1,0 +1,6 @@
+#!/bin/bash
+screenfilename=$1
+#adb指令截图
+adb shell /system/bin/screencap -p /sdcard/$screenfilename
+#将截图指令拉到指定文件夹
+adb pull /sdcard/$screenfilename .
